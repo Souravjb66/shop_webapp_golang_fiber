@@ -36,6 +36,7 @@ func CreateClient(c *fiber.Ctx)error{
 		Price:myuser.Myproducts.Price,
 
 	}
+	
 	output1:=database.MyDatabase.Db.Create(&myclient)
 	if output1!=nil{
 		log.Println(output1)
@@ -47,6 +48,14 @@ func CreateClient(c *fiber.Ctx)error{
 		log.Println(output2)
 	}else{
 		log.Println("erorr in creating product")
+	}
+	bothUserProduct:=models.UserProducts{ //we assign it after main 2 tables values are inserted after that in that name have current value id  so we can assign it in combine table
+		ClientId:myclient.Id,
+		ProductId:myproduct.Id,
+	}
+	output3:=database.MyDatabase.Db.Create(&bothUserProduct)
+	if err!=nil{
+		log.Println(output3)
 	}
 	return c.Status(200).JSON(myuser)
 
@@ -66,8 +75,14 @@ func GetAllClientsWithProduct(c *fiber.Ctx)error{
 	var client models.Client
 	var product models.Products
 
-	database.MyDatabase.Db.Find(&client)
-	database.MyDatabase.Db.Find(&product)
+	one:=database.MyDatabase.Db.Find(&client)
+	if one!=nil{
+		log.Println(one)
+	}
+	two:=database.MyDatabase.Db.Find(&product)
+	if two!=nil{
+		log.Println(two)
+	}
 
 	values:=AllValues{
 		ClientId: client.Id,

@@ -28,4 +28,6 @@ func main(){
 }
 func routes(app *fiber.App){
 	app.Get("/",service.GetIndex)
+	app.Post("/saveAll",service.CreateClient)
+	app.Get("/getAll",service.GetAllClientsWithProduct)
 }
