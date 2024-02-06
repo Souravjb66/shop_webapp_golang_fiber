@@ -12,12 +12,16 @@ func GetIndex(c *fiber.Ctx)error{
 
 }
 func CreateClient(c *fiber.Ctx)error{
+	
 	type User struct{
-		Name string `json:"name" gorm:"not null"`
+		Clientname string `json:"clientname" gorm:"not null"`
 		Username string `json:"username" gorm:"not null"`
 		Password string `json:"password" gorm:"not null"`
 		Email string `json:"email" gorm:"not null"`
-		Myproducts models.Products `json:"myproducts" gorm:"no null"`
+		Productname string `json:"productname" gorm:"not null"`
+		ProductType string `json:"producttype" gorm:"not null"`
+		Price uint `json:"price" gorm:"not null"`
+
 	}
 	var myuser User
 	err:=c.BodyParser(&myuser)
@@ -25,15 +29,15 @@ func CreateClient(c *fiber.Ctx)error{
 		log.Println("error in create client",err)
 	}
 	myclient:=models.Client{
-		Name:myuser.Name,
+		Name:myuser.Clientname,
 		Username: myuser.Username,
 		Password: myuser.Password,
 		Email: myuser.Email,
 	}
 	myproduct:=models.Products{
-		Name:myuser.Myproducts.Name,
-		ProductType: myuser.Myproducts.ProductType,
-		Price:myuser.Myproducts.Price,
+		Name:myuser.Productname,
+		ProductType: myuser.ProductType,
+		Price:myuser.Price,
 
 	}
 	
@@ -60,6 +64,7 @@ func CreateClient(c *fiber.Ctx)error{
 	return c.Status(200).JSON(myuser)
 
 }
+
 func GetAllClientsWithProduct(c *fiber.Ctx)error{
 	type AllValues struct{
 		ClientId uint `json:"id"`
@@ -72,8 +77,8 @@ func GetAllClientsWithProduct(c *fiber.Ctx)error{
 		ProductType string `json:"producttype"`
 		ProductPrice uint `json:"productprice"`
 	}
-	var client models.Client
-	var product models.Products
+	var client []models.Client
+	var product []models.Products
 
 	one:=database.MyDatabase.Db.Find(&client)
 	if one!=nil{
@@ -83,18 +88,30 @@ func GetAllClientsWithProduct(c *fiber.Ctx)error{
 	if two!=nil{
 		log.Println(two)
 	}
+	values:=[]AllValues{}
+	for _,user:=range client{
+		values=append(values,AllValues{
+			ClientId:user.Id,
+			ClientName:user.Name,
+			ClientUsername:user.Username,
+			ClientPassword:user.Password,
+			ClientEmail:user.Email,
+		
+		} )
 
-	values:=AllValues{
-		ClientId: client.Id,
-		ClientName: client.Name,
-		ClientUsername: client.Username,
-		ClientPassword: client.Password,
-		ClientEmail:client.Email,
-		ProductId: product.Id,
-		ProductName: product.Name,
-		ProductType: product.ProductType,
-		ProductPrice: product.Price,
+
 	}
+	for _,item:=range product{
+		values=append(values, AllValues{
+			ProductId:item.Id,
+				ProductName:item.Name,
+				ProductType:item.ProductType,
+				ProductPrice: item.Price,
+
+		})
+	}
+
+	
 	return c.Status(200).JSON(values)
 
 }
